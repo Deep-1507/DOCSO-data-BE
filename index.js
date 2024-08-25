@@ -76,6 +76,21 @@ app.post('/search', async (req, res) => {
     }
 });
 
+app.get('/categories', async (req, res) => {
+    try {
+        const categories = await Doctor.aggregate([
+            { $unwind: '$categories' },
+            { $group: { _id: '$categories' } },
+            { $project: { _id: 0, category: '$_id' } }
+        ]);
+
+        const uniqueCategories = categories.map(cat => cat.category);
+        res.json(uniqueCategories);
+    } catch (err) {
+        console.error('Error fetching categories:', err);
+        res.status(500).send('Server error');
+    }
+});
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
